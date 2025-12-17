@@ -1,0 +1,9 @@
+﻿vendor/
+node_modules/
+.env
+/storage/*.key
+/storage/framework/*
+/storage/logs/*
+/public/storage
+/.idea
+/.vscode
