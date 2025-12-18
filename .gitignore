@@ -1,4 +1,40 @@
-﻿vendor/
+﻿# Laravel
+
+# Dependencies
+/vendor/
+/node_modules/
+
+# Laravel specific
+/public/storage
+/storage/*.key
+/storage/debugbar
+
+# Environment
+/.env
+.env.*.local
+
+# IDEs and editors
+/.idea/
+/.vscode/
+
+# PHPUnit
+/.phpunit.result.cache
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Mix / npm
+/npm-debug.log*
+/yarn-error.log*
+
+# Build outputs
+/public/hot
+/public/build
+
+# Composer PHAR
+composer.phar
+vendor/
 node_modules/
 .env
 /storage/*.key

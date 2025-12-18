@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initNewsFilters();
     initSearch();
     initPagination();
+    initPopularPolling();
 });
 
 // Initialize News Filters
@@ -202,14 +203,79 @@ function sortNews(type) {
 }
 
 // Popular News Click Tracking
-document.querySelectorAll('.popular-item').forEach(item => {
-    item.addEventListener('click', function(e) {
-        e.preventDefault();
-        const title = this.querySelector('h4').textContent;
-        console.log('Popular news clicked:', title);
-        // In real app, navigate to article or track analytics
+function formatViews(n) {
+    if (n >= 1000000) return (n/1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (n >= 1000) return (n/1000).toFixed(1).replace(/\.0$/, '') + 'K';
+    return n.toString();
+}
+
+function renderPopularList(items) {
+    const container = document.querySelector('.popular-news');
+    if (!container) return;
+
+    container.innerHTML = '';
+    items.forEach((it, idx) => {
+        const a = document.createElement('a');
+        a.href = '/berita/' + encodeURIComponent(it.slug);
+        a.className = 'popular-item';
+        a.innerHTML = `
+            <span class="popular-number">${idx + 1}</span>
+            <div>
+                <h4>${escapeHtml(it.title)}</h4>
+                <span class="popular-views"><i class="fas fa-eye"></i> ${formatViews(it.views)}</span>
+            </div>
+        `;
+
+        // click tracking (optional)
+        a.addEventListener('click', function(e){
+            // allow navigation
+        });
+
+        container.appendChild(a);
     });
-});
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Polling for popular news every 10 seconds
+function initPopularPolling() {
+    async function fetchPopular() {
+        try {
+            const res = await fetch('/api/popular-news', { cache: 'no-store' });
+            if (!res.ok) throw new Error('Network response not ok');
+            const data = await res.json();
+            if (Array.isArray(data)) {
+                renderPopularList(data);
+            }
+        } catch (err) {
+            console.warn('Failed to fetch popular news:', err.message);
+        }
+    }
+
+    // initial load
+    fetchPopular();
+
+    // periodic polling
+    setInterval(fetchPopular, 10000);
+}
+
+// If Laravel Echo is available (Pusher/websockets configured), listen for push updates
+if (window.Echo) {
+    try {
+        window.Echo.channel('popular-news').listen('PopularNewsUpdated', (e) => {
+            if (e && e.items) {
+                // e.items may be array of {title,slug,views}
+                renderPopularList(e.items);
+            }
+        });
+    } catch (err) {
+        console.warn('Echo listener error:', err.message);
+    }
+}
 
 // Read More Click Tracking
 document.querySelectorAll('.read-more').forEach(link => {

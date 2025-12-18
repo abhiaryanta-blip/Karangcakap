@@ -295,6 +295,41 @@
             background: #f8d7da;
             color: #721c24;
         }
+        
+        /* Responsive admin sidebar */
+        @media (max-width: 900px) {
+            .sidebar {
+                position: fixed;
+                left: -260px;
+                top: 0;
+                bottom: 0;
+                width: 260px;
+                transition: left 0.28s ease;
+                z-index: 2000;
+            }
+
+            .sidebar.open {
+                left: 0;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .topbar {
+                position: fixed;
+                left: 0;
+                right: 0;
+                top: 0;
+                z-index: 1500;
+            }
+
+            .content { padding-top: 90px; }
+
+            .sidebar-menu li a { padding: 12px 16px; }
+
+            .sidebar-toggle { display: inline-flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; background: transparent; border: none; cursor: pointer; }
+        }
     </style>
     @stack('styles')
 </head>
@@ -326,6 +361,9 @@
         <!-- Top Bar -->
         <div class="topbar">
             <div class="topbar-left">
+                <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar" style="display:none;">
+                    <i class="fas fa-bars"></i>
+                </button>
                 <h1>@yield('title')</h1>
             </div>
             <div class="topbar-right">
@@ -361,8 +399,42 @@
     </div>
 
     @stack('scripts')
+    <script>
+        (function(){
+            const btn = document.getElementById('sidebarToggle');
+            const sidebar = document.querySelector('.sidebar');
+            function updateButtonVisibility(){
+                if(window.innerWidth <= 900){
+                    if(btn) btn.style.display = 'inline-flex';
+                } else {
+                    if(btn) btn.style.display = 'none';
+                    if(sidebar) sidebar.classList.remove('open');
+                }
+            }
+            window.addEventListener('resize', updateButtonVisibility);
+            updateButtonVisibility();
+
+            if(btn && sidebar){
+                btn.addEventListener('click', function(e){
+                    e.stopPropagation();
+                    sidebar.classList.toggle('open');
+                });
+
+                // close when clicking outside
+                document.addEventListener('click', function(e){
+                    if(sidebar.classList.contains('open')){
+                        if(!sidebar.contains(e.target) && !btn.contains(e.target)){
+                            sidebar.classList.remove('open');
+                        }
+                    }
+                });
+            }
+        })();
+    </script>
 </body>
 </html>
+
+
 
 
 

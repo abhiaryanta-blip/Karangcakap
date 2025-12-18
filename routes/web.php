@@ -45,6 +45,17 @@ Route::get('/berita/{slug}', function ($slug) {
     
     // Increment views
     $article->increment('views');
+
+    // Broadcast updated popular list (if broadcasting configured)
+    try {
+        $top = \App\Models\News::where('status', 'published')
+            ->orderByDesc('views')
+            ->take(5)
+            ->get(['title','slug','views']);
+        event(new \App\Events\PopularNewsUpdated($top));
+    } catch (\Throwable $e) {
+        // ignore if broadcasting not configured
+    }
     
     return view('news-detail', compact('article'));
 })->name('news.detail');
@@ -66,6 +77,16 @@ Route::post('/api/chat-test', function (Request $request) {
         'response' => 'Echo: ' . $message,
     ]);
 })->name('chat.test');
+
+// API: Popular news (used by client-side polling for near-realtime updates)
+Route::get('/api/popular-news', function () {
+    $items = \App\Models\News::where('status', 'published')
+        ->orderByDesc('views')
+        ->take(5)
+        ->get(['title', 'slug', 'views']);
+
+    return response()->json($items);
+});
 
 // Debug route to test Gemini API
 Route::get('/test-gemini', function () {

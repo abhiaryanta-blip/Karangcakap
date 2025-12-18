@@ -267,14 +267,7 @@
                         <li><a href="#">Penelitian</a></li>
                     </ul>
                 </div>
-                <div class="footer-section">
-                    <h4>Kontak</h4>
-                    <ul>
-                        <li><i class="fas fa-envelope"></i> info@karangcakap.com</li>
-                        <li><i class="fas fa-phone"></i> +62 21 1234 5678</li>
-                        <li><i class="fas fa-map-marker-alt"></i> Jakarta, Indonesia</li>
-                    </ul>
-                </div>
+                <!-- Kontak section removed as requested -->
             </div>
             <div class="footer-bottom">
                 <p>&copy; 2025 Karang Cakap. All rights reserved.</p>
