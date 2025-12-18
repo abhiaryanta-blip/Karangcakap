@@ -22,20 +22,42 @@ WORKDIR /app
 # Copy composer files first
 COPY composer.json composer.lock ./
 
-# Install PHP dependencies
+# Install PHP dependencies (without dev)
 RUN composer install --no-interaction --no-dev --optimize-autoloader
 
 # Copy entire project
 COPY . .
 
-# Create cache directory
-RUN mkdir -p bootstrap/cache storage/logs && chmod -R 775 bootstrap/cache storage logs
+# Fix permissions
+RUN chown -R www-data:www-data /app
+
+# Create necessary directories with proper permissions
+RUN mkdir -p \
+    bootstrap/cache \
+    storage/logs \
+    storage/framework \
+    storage/framework/cache \
+    storage/framework/sessions \
+    storage/framework/views \
+    database && \
+    chmod -R 775 bootstrap/cache storage database && \
+    chmod -R 775 storage/logs
+
+# Create database file if it doesn't exist
+RUN touch database/database.sqlite
 
 # Generate app key
-RUN php artisan key:generate --force || true
+RUN php artisan key:generate --force 2>/dev/null || true
+
+# Run migrations (optional but recommended)
+RUN php artisan migrate --force 2>/dev/null || true
 
 # Expose port
 EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/up || exit 1
 
 # Run artisan serve
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
