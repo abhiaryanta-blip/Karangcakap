@@ -19,14 +19,14 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 
 WORKDIR /app
 
-# Copy composer files first
-COPY composer.json composer.lock ./
+# Copy entire project first
+COPY . .
 
 # Install PHP dependencies (without dev)
-RUN composer install --no-interaction --no-dev --optimize-autoloader
+RUN composer install --no-interaction --no-dev --optimize-autoloader --no-scripts
 
-# Copy entire project
-COPY . .
+# Run post-install scripts after project is fully copied
+RUN composer run-script post-autoload-dump 2>/dev/null || true
 
 # Fix permissions
 RUN chown -R www-data:www-data /app
