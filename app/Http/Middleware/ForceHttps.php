@@ -15,8 +15,14 @@ class ForceHttps
             URL::forceScheme('https');
         }
 
-        // Trust proxy headers
-        $request->setTrustedProxies(['*'], Request::HEADER_X_FORWARDED_ALL);
+        // Trust proxy headers for ngrok
+        if (str_contains($request->host(), 'ngrok')) {
+            $request->setTrustedProxies(['*'], 
+                Request::HEADER_X_FORWARDED_FOR | 
+                Request::HEADER_X_FORWARDED_HOST | 
+                Request::HEADER_X_FORWARDED_PROTO
+            );
+        }
 
         return $next($request);
     }
