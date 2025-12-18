@@ -8,10 +8,10 @@ use App\Http\Controllers\Admin\NewsController as AdminNewsController;
 use App\Http\Controllers\Admin\UserController;
 
 // Public Routes
-// Redirect root to login so users (including admins) land on the login page first
-Route::get('/', function () {
-    return redirect()->route('login');
-});
+// Use controller to redirect root depending on authentication/role
+use App\Http\Controllers\HomeRedirectController;
+
+Route::get('/', HomeRedirectController::class);
 
 // Preserve the original home page under /home so `route('home')` still works
 Route::get('/home', function () {
